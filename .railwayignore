@@ -1,0 +1,9 @@
+*.pyc
+__pycache__/
+.git/
+.vscode/
+.DS_Store
+*.log
+.env
+backend/test*.ipynb
+backend/downloads/*.json
