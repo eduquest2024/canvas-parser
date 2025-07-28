@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file, render_template
+from flask import Flask, request, jsonify, send_file, render_template, send_from_directory
 from flask_cors import CORS
 import os
 import uuid
@@ -14,8 +14,16 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__, 
             static_folder='../frontend',
+            static_url_path='',
             template_folder='../frontend')
 CORS(app)  # Enable CORS for frontend communication
+
+# Serve frontend static assets at root
+@app.route('/<path:filename>')
+def serve_frontend_static(filename):
+    """Serve CSS, JS, and other static files from the frontend directory"""
+    frontend_dir = os.path.join(os.path.dirname(__file__), '../frontend')
+    return send_from_directory(frontend_dir, filename)
 
 # Create directories for file storage
 DOWNLOAD_DIR = os.path.join(os.path.dirname(__file__), 'downloads')
