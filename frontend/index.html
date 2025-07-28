@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Course Extractor</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Canvas Course Extractor</h1>
+            <p>Extract and download your Canvas course content as structured JSON</p>
+        </header>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Connect</div>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Select Course</div>
+                </div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Extract</div>
+                </div>
+                <div class="progress-step" data-step="4">
+                    <div class="step-number">4</div>
+                    <div class="step-label">Download</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 1: Canvas Authentication -->
+        <div class="step-content" id="step1">
+            <div class="card">
+                <h2>🔗 Connect to Canvas</h2>
+                <p>Enter your Canvas API credentials to get started</p>
+                
+                <form id="authForm">
+                    <div class="form-group">
+                        <label for="apiUrl">Canvas API URL</label>
+                        <input type="url" id="apiUrl" name="apiUrl" placeholder="https://yourschool.instructure.com" required>
+                        <small>Usually in the format: https://[institution].instructure.com</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="apiKey">API Access Token</label>
+                        <input type="password" id="apiKey" name="apiKey" placeholder="Your Canvas API token" required>
+                        <small>
+                            <a href="#" onclick="toggleApiKeyHelp()">How to get your API token? 🔗</a>
+                        </small>
+                    </div>
+
+                    <div id="apiKeyHelp" class="help-text" style="display: none;">
+                        <h4>How to get your Canvas API token:</h4>
+                        <ol>
+                            <li>Log into your Canvas account</li>
+                            <li>Go to Account → Settings</li>
+                            <li>Scroll down to "Approved Integrations"</li>
+                            <li>Click "+ New Access Token"</li>
+                            <li>Give it a purpose (e.g., "Course Extractor")</li>
+                            <li>Copy the generated token</li>
+                        </ol>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" id="connectBtn">
+                        <span class="btn-text">Connect to Canvas</span>
+                        <span class="btn-loading" style="display: none;">Connecting...</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Step 2: Course Selection -->
+        <div class="step-content" id="step2" style="display: none;">
+            <div class="card">
+                <h2>📋 Select Course</h2>
+                <p>Choose the course you want to extract</p>
+                
+                <div id="coursesLoading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading your courses...</p>
+                </div>
+                
+                <div id="coursesList" style="display: none;">
+                    <div class="courses-container" id="coursesContainer">
+                        <!-- Courses will be populated here -->
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="goToStep(1)">← Back</button>
+                        <button type="button" class="btn btn-primary" id="selectCourseBtn" disabled onclick="selectCourse()">
+                            Continue with Selected Course →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Parsing Progress -->
+        <div class="step-content" id="step3" style="display: none;">
+            <div class="card">
+                <h2>⚙️ Extracting Course Content</h2>
+                <p id="parsingMessage">Parsing your course modules and content...</p>
+                
+                <div class="progress-circle">
+                    <div class="spinner large"></div>
+                </div>
+                
+                <div id="parsingDetails" class="parsing-details">
+                    <p>This may take a few moments depending on the course size.</p>
+                    <ul id="parsingSteps">
+                        <li>📁 Scanning course modules...</li>
+                        <li>📄 Processing assignments...</li>
+                        <li>📝 Extracting pages and discussions...</li>
+                        <li>📎 Gathering file information...</li>
+                        <li>💾 Generating JSON file...</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4: Download Result -->
+        <div class="step-content" id="step4" style="display: none;">
+            <div class="card">
+                <h2>✅ Extraction Complete!</h2>
+                <p>Your course content has been successfully extracted</p>
+                
+                <div id="resultsInfo" class="results-info">
+                    <!-- Results will be populated here -->
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="startOver()">Extract Another Course</button>
+                    <button type="button" class="btn btn-primary" id="downloadBtn">
+                        📥 Download JSON File
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Display -->
+        <div id="errorMessage" class="error-message" style="display: none;">
+            <div class="error-content">
+                <span class="error-icon">⚠️</span>
+                <span class="error-text"></span>
+                <button class="error-close" onclick="hideError()">×</button>
+            </div>
+        </div>
+
+        <!-- Success Display -->
+        <div id="successMessage" class="success-message" style="display: none;">
+            <div class="success-content">
+                <span class="success-icon">✅</span>
+                <span class="success-text"></span>
+                <button class="success-close" onclick="hideSuccess()">×</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Canvas Course Extractor - Extract your course content for offline access or analysis</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html> 
